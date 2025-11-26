@@ -824,7 +824,13 @@ INLINE static void black_holes_props_init(struct black_holes_props *bp,
   bp->jet_minimum_reservoir_mass = parser_get_param_float(
       params, "ObsidianAGN:jet_minimum_reservoir_mass_Msun");
   bp->jet_minimum_reservoir_mass /= bp->mass_to_solar_mass;
+  bp->lum_thresh_always_jet = parser_get_opt_param_float(
+      params, "ObsidianAGN:lum_thresh_always_jet_1e45_erg_s", 0.f);
+  bp->lum_thresh_always_jet *=
+      units_cgs_conversion_factor(us, UNIT_CONV_TIME) /
+      units_cgs_conversion_factor(us, UNIT_CONV_ENERGY);
 
+  /* 2 is along accreted angular momentum direction */
   bp->default_dir_flag =
       parser_get_opt_param_int(params, "ObsidianAGN:default_dir_flag", 2);
 
@@ -1220,10 +1226,11 @@ INLINE static void black_holes_props_init(struct black_holes_props *bp,
     message("Black hole jet recouple factor is %g", f_jet_recouple);
     message("Black hole quasar radiative efficiency is %g", bp->epsilon_r);
     if (bp->quasar_luminosity_thresh > 0.f) {
-      message(
-          "Black hole quasar coupling %g is boosted above Lbol>%g erg/s",
-          bp->quasar_coupling,
-          bp->quasar_luminosity_thresh * bp->conv_factor_energy_rate_to_cgs);
+      message("Black hole quasar coupling %g is boosted above Lbol>%g erg/s",
+              bp->quasar_coupling,
+              bp->quasar_luminosity_thresh *
+
+                  bp->conv_factor_energy_rate_to_cgs * 1.e45);
     }
     if (bp->lum_thresh_always_jet > 0.f) {
       message("Black hole jet mode always on above Lbol>%g erg/s",
